@@ -147,9 +147,10 @@ class RangerDlg(c4d.gui.GeDialog):
             return False
 
         if True == r_handle_render_queue.handle_render_queue(self.customFrameRanges, self.startRenderQueue):
-            print("*** custom frame ranges submitted")
+            print("*** Custom frame ranges submitted")
+
         else:
-            print("*** unexpected result from custom frame ranges submission")
+            print("*** Unexpected result from custom frame ranges submission")
             return False
 
         return True

@@ -131,6 +131,11 @@ def get_projectFullPath():
 
     md = c4d.documents.GetActiveDocument()
     path = c4d.documents.BaseDocument.GetDocumentPath(md)
+    name = c4d.documents.BaseDocument.GetDocumentName(md)
+
+    print("NB Project path is: ", path)
+    print("NB Project name is: ", name)
+
     c4dProjectFullPath = ''
     if '' == path:
         print("*** A project has not yet been opened")
@@ -139,6 +144,19 @@ def get_projectFullPath():
         print("NB Project opened is: ", c4dProjectFullPath)
 
     return c4dProjectFullPath
+
+# ===================================================================
+def get_projectPath():
+# ===================================================================
+    # Gets project path from the currently loaded project
+    # ...................................................
+
+    md = c4d.documents.GetActiveDocument()
+    path = c4d.documents.BaseDocument.GetDocumentPath(md)
+    if '' == path:
+        print("*** A project has not yet been opened")
+
+    return path
 
 # ===================================================================
 def get_projectName():
