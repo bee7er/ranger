@@ -1,5 +1,5 @@
 """
-Copyright: Brian Etheridge 2023
+Copyright: Etheridge Family Nov 2022
 Author: Brian Etheridge
 """
 import c4d
@@ -18,7 +18,8 @@ def handle_render_queue(customFrameRanges, startRenderQueue):
     # ........................................................................
 
     try:
-        print("*** In handle_render_queue")
+        if True == debug:
+            print("*** In handle_render_queue")
 
         doc = documents.GetActiveDocument()
         docPath = r_functions.get_projectPath()
@@ -50,7 +51,7 @@ def handle_render_queue(customFrameRanges, startRenderQueue):
 
             missingAssets = []
             assets = []
-            res = c4d.documents.SaveProject(doc, c4d.SAVEPROJECT_ASSETS | c4d.SAVEPROJECT_SCENEFILE, docPath, assets, missingAssets)
+            res = c4d.documents.SaveProject(doc, c4d.SAVEPROJECT_ASSETS | c4d.SAVEPROJECT_SCENEFILE | c4d.SAVEPROJECT_USEDOCUMENTNAMEASFILENAME, docPath, assets, missingAssets)
             if True == res:
                 if True == debug:
                     print("*** Success saving project with assets")
@@ -65,7 +66,8 @@ def handle_render_queue(customFrameRanges, startRenderQueue):
             # Add the project to the end of the queue
             br.AddFile(docFullPath, br.GetElementCount())
 
-        if True == startRenderQueue:
+            # We have to render the frames immediately to get the right ones rendered
+            # if True == startRenderQueue:
             if True == debug:
                 print("*** Start render queue requested")
 
@@ -80,7 +82,7 @@ def handle_render_queue(customFrameRanges, startRenderQueue):
         return True
 
     except Exception as e:
-        message = "Error trying to render. Error message: " + str(e)
+        message = "Error trying to add render request to queue. Error message: " + str(e)
         print(message)
         print(e.args)
 

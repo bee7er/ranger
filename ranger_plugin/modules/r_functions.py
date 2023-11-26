@@ -3,6 +3,7 @@ Copyright: Etheridge Family Nov 2022
 Author: Brian Etheridge
 """
 import os, platform, c4d
+
 try:
     # R2023
     import configparser as configurator
@@ -76,8 +77,8 @@ def analyse_frame_ranges(frameRangeStr):
 
     # Remove all spaces
     frameRangeLst = frameRangeStr.replace(' ', '').split(',')
-    returnStr = ''
-    sep = ''
+    rangeArray = []
+
     for entry in frameRangeLst:
         # Range should be number-number
         rangelet = entry.split('-')
@@ -100,10 +101,50 @@ def analyse_frame_ranges(frameRangeStr):
             rangelet[0] = rangelet[1]
             rangelet[1] = el
             
-        returnStr += sep + str(rangelet[0]) + '-' + str(rangelet[1])
-        sep = ','
+        rangeArray.append(rangelet)
 
-    print("Frame ranges requested: ", returnStr)
+    return normalise_frame_ranges(rangeArray)
+
+# ===================================================================
+def sortNumeric(val):
+# ===================================================================
+    # We sort on the first element of the array, but make sure it is
+    # a numeric comparison so that 7 is before 15 (ie '7' > '15')
+    return int(val[0])
+
+# ===================================================================
+def normalise_frame_ranges(rangeArray):
+# ===================================================================
+    # Check that the set of rangelets make sense
+    # .....................................................
+    # If we have one or no ranges specified then nothing to do here
+    if 1 >= len(rangeArray):
+        return []
+
+    # Do a numeric sort into ascending order
+    rangeArray.sort(key=sortNumeric)
+    outArray = []
+    for elem in rangeArray:
+        outArrayLen = len(outArray)
+        if 0 >= outArrayLen:
+            outArray.append(elem)
+            continue
+
+        # If start of range is less than or equal to end of range plus 1
+        # E.g. 1-1, 2-6, combine them
+        if int(elem[0]) <= int(outArray[outArrayLen - 1][1]) + 1:
+            if int(elem[1]) >= int(outArray[outArrayLen - 1][1]):
+                outArray[outArrayLen - 1][1] = elem[1]
+            # We have adjusted the out array and do not need the element
+            continue
+
+        # Just add this new rangelet to out array
+        outArray.append(elem)
+
+    returnStr = sep = ''
+    for elem in outArray:
+        returnStr += sep + str(elem[0]) + '-' + str(elem[1])
+        sep = ','
 
     return returnStr
 
@@ -138,7 +179,7 @@ def get_projectFullPath():
 
     c4dProjectFullPath = ''
     if '' == path:
-        print("*** A project has not yet been opened")
+        print("*** A project has not yet been opened for full path")
     else:
         c4dProjectFullPath = os.path.join(path, c4d.documents.BaseDocument.GetDocumentName(md))
         print("NB Project opened is: ", c4dProjectFullPath)
@@ -154,7 +195,7 @@ def get_projectPath():
     md = c4d.documents.GetActiveDocument()
     path = c4d.documents.BaseDocument.GetDocumentPath(md)
     if '' == path:
-        print("*** A project has not yet been opened")
+        print("*** A project has not yet been opened for path")
 
     return path
 
@@ -166,7 +207,7 @@ def get_projectName():
 
     md = c4d.documents.GetActiveDocument()
     if '' == md:
-        print("*** A project has not yet been opened")
+        print("*** A project has not yet been opened for name")
         return ''
 
     projectName = c4d.documents.BaseDocument.GetDocumentName(md)

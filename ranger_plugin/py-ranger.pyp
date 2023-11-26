@@ -1,5 +1,5 @@
 """
-Copyright: Brian Etheridge 2023
+Copyright: Etheridge Family 2023
 Author: Brian Etheridge
 
 Description:
@@ -60,9 +60,9 @@ class RangerDlg(c4d.gui.GeDialog):
         self.AddEditText(EDIT_FRAME_RANGES_TEXT, c4d.BFV_MASK, initw=240, inith=16, editflags=0)
         self.SetString(EDIT_FRAME_RANGES_TEXT, self.customFrameRanges)
         """ Start rendering field """
-        self.AddStaticText(id=START_QUEUE_CHECKBOX_TEXT, flags=c4d.BFV_MASK, initw=145, name="Start rendering: ", borderstyle=c4d.BORDER_NONE)
-        self.AddCheckbox(START_QUEUE_CHECKBOX, flags=c4d.BFH_LEFT, initw=160, inith=22, name="Check to start on OK")
-        self.SetBool(START_QUEUE_CHECKBOX, self.startRenderQueue)
+        # self.AddStaticText(id=START_QUEUE_CHECKBOX_TEXT, flags=c4d.BFV_MASK, initw=145, name="*** Currently ignored", borderstyle=c4d.BORDER_NONE)
+        # self.AddCheckbox(START_QUEUE_CHECKBOX, flags=c4d.BFH_LEFT, initw=160, inith=22, name="Check to start rendering")
+        # self.SetBool(START_QUEUE_CHECKBOX, self.startRenderQueue)
 
         self.AddDlgGroup(c4d.DLG_OK | c4d.DLG_CANCEL)
         self.GroupEnd()
@@ -110,8 +110,8 @@ class RangerDlg(c4d.gui.GeDialog):
                 self.rangeFrom = 0
                 self.rangeTo = 0
 
-                # Close the Dialog
-                self.Close()
+                # Close the Dialog:  currently leaving it open
+                ######self.Close()
 
             else:
                 print("Submission of render request cancelled")
