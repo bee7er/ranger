@@ -4,7 +4,6 @@ Author: Brian Etheridge
 """
 import c4d
 from c4d import documents
-
 import r_functions
 
 config = r_functions.get_config_values()

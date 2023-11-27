@@ -7,16 +7,14 @@ Description:
 """
 
 import os, sys
-
-__root__ = os.path.dirname(__file__)
-if os.path.join(__root__, 'modules') not in sys.path: sys.path.insert(0, os.path.join(__root__, 'modules'))
-
 import c4d
 from c4d import gui, bitmaps, utils
 from c4d import documents
-
 # Ranger modules for various shared functions
 import r_functions, r_handle_render_queue
+
+__root__ = os.path.dirname(__file__)
+if os.path.join(__root__, 'modules') not in sys.path: sys.path.insert(0, os.path.join(__root__, 'modules'))
 
 __res__ = c4d.plugins.GeResource()
 __res__.Init(__root__)
