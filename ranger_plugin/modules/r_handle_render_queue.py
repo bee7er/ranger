@@ -2,9 +2,12 @@
 Copyright: Etheridge Family Nov 2022
 Author: Brian Etheridge
 """
-import c4d
+import c4d, time
 from c4d import documents
+from c4d import gui
 import r_functions
+
+SLEEP_LIMIT = 3
 
 config = r_functions.get_config_values()
 debug = bool(int(config.get(r_functions.CONFIG_SECTION, 'debug')))
@@ -33,8 +36,30 @@ def handle_render_queue(customFrameRanges):
         if br is None:
             raise RuntimeError("Failed to retrieve the batch render instance.")
 
+        rangesStillToDo = customFrameRanges
         frameRanges = customFrameRanges.split(',')
+        sleepCount = 0
         for range in frameRanges:
+
+            while True:
+                if br.IsRendering():
+                    if True == debug:
+                        print("*** Sleeping: ", sleepCount)
+
+                    sleepCount += 1
+                    if SLEEP_LIMIT <= sleepCount:
+                        raise RuntimeError("Render queue is too busy.  Unable to process: " + rangesStillToDo + " Please try again later.")
+
+                    time.sleep(1)
+                    continue
+
+                else:
+                    break
+
+            sleepCount = 0
+            # We can successfully render this range, remove it from set of ranges
+            rangesStillToDo = rangesStillToDo.replace(range + ',', '')
+
             rangeLimits = range.split('-')
             frameFrom = int(rangeLimits[0])
             frameTo = int(rangeLimits[1])
@@ -76,6 +101,6 @@ def handle_render_queue(customFrameRanges):
     except Exception as e:
         message = "Error trying to add render request to queue. Error message: " + str(e)
         print(message)
-        print(e.args)
+        gui.MessageDialog(message)
 
         return False

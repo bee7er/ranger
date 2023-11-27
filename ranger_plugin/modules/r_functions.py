@@ -71,7 +71,6 @@ def analyse_frame_ranges(frameRangeStr):
 # ===================================================================
     # Analyses a string of frame ranges, validates them and returns a list of them
     # .....................................................
-
     config = get_config_values()
     verbose = config.get(CONFIG_SECTION, 'verbose')
 
@@ -117,29 +116,30 @@ def normalise_frame_ranges(rangeArray):
 # ===================================================================
     # Check that the set of rangelets make sense
     # .....................................................
-    # If we have one or no ranges specified then nothing to do here
-    if 1 >= len(rangeArray):
-        return []
-
-    # Do a numeric sort into ascending order
-    rangeArray.sort(key=sortNumeric)
     outArray = []
-    for elem in rangeArray:
-        outArrayLen = len(outArray)
-        if 0 >= outArrayLen:
+    # If we have one or no ranges specified then nothing complicated to do here
+    if 1 >= len(rangeArray):
+        outArray = rangeArray
+
+    else:
+        # Do a numeric sort into ascending order
+        rangeArray.sort(key=sortNumeric)
+        for elem in rangeArray:
+            outArrayLen = len(outArray)
+            if 0 >= outArrayLen:
+                outArray.append(elem)
+                continue
+
+            # If start of range is less than or equal to end of range plus 1
+            # E.g. 1-1, 2-6, combine them as 1-6
+            if int(elem[0]) <= int(outArray[outArrayLen - 1][1]) + 1:
+                if int(elem[1]) >= int(outArray[outArrayLen - 1][1]):
+                    outArray[outArrayLen - 1][1] = elem[1]
+                # We have adjusted the out array and do not need the element
+                continue
+
+            # Just add this new rangelet to out array
             outArray.append(elem)
-            continue
-
-        # If start of range is less than or equal to end of range plus 1
-        # E.g. 1-1, 2-6, combine them as 1-6
-        if int(elem[0]) <= int(outArray[outArrayLen - 1][1]) + 1:
-            if int(elem[1]) >= int(outArray[outArrayLen - 1][1]):
-                outArray[outArrayLen - 1][1] = elem[1]
-            # We have adjusted the out array and do not need the element
-            continue
-
-        # Just add this new rangelet to out array
-        outArray.append(elem)
 
     returnStr = sep = ''
     for elem in outArray:

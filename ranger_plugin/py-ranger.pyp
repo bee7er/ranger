@@ -86,11 +86,15 @@ class RangerDlg(c4d.gui.GeDialog):
 
             self.customFrameRanges = self.GetString(EDIT_FRAME_RANGES_TEXT)
 
+            print("self.customFrameRanges=", self.customFrameRanges)
+
             # Analyse the custom frange ranges
             self.customFrameRanges = r_functions.analyse_frame_ranges(self.customFrameRanges)
             if '' == self.customFrameRanges:
                 gui.MessageDialog("Please enter at least one valid range, in the format 'm - m, n - n, etc'")
                 return False
+
+            print("New self.customFrameRanges=", self.customFrameRanges)
 
             if True == debug:
                 print("Frame range(s): ", self.customFrameRanges)
