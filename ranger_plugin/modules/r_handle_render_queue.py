@@ -12,7 +12,7 @@ debug = bool(int(config.get(r_functions.CONFIG_SECTION, 'debug')))
 verbose = bool(int(config.get(r_functions.CONFIG_SECTION, 'verbose')))
 
 # ===================================================================
-def handle_render_queue(customFrameRanges, startRenderQueue):
+def handle_render_queue(customFrameRanges):
 # ===================================================================
     # Submits a render request for one or more frames to the BatchRender queue
     # ........................................................................
@@ -66,18 +66,11 @@ def handle_render_queue(customFrameRanges, startRenderQueue):
             # Add the project to the end of the queue
             br.AddFile(docFullPath, br.GetElementCount())
 
-            # We have to render the frames immediately to get the right ones rendered
-            # if True == startRenderQueue:
-            if True == debug:
-                print("*** Start render queue requested")
-
+            # We have to render the frames immediately to get the right ones rendered, as c4d
+            # does not save the render settings with the queue entry
             br.SetRendering(c4d.BR_START)
             if True == debug:
                 print("*** Render queue started")
-
-        else:
-            if True == debug:
-                print("*** Start render queue not requested")
 
         return True
 

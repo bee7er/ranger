@@ -27,8 +27,10 @@ GROUP_ID = 100000
 
 FRAME_RANGES_TEXT = 100015
 EDIT_FRAME_RANGES_TEXT = 100016
-START_QUEUE_CHECKBOX_TEXT = 100017
-START_QUEUE_CHECKBOX = 100018
+RENDER_BUTTON = 100017
+CANCEL_BUTTON = 100018
+BLANK_TEXT_1 = 100019
+BLANK_TEXT_2 = 100020
 
 config = r_functions.get_config_values()
 debug = bool(int(config.get(r_functions.CONFIG_SECTION, 'debug')))
@@ -39,32 +41,27 @@ class RangerDlg(c4d.gui.GeDialog):
 # ===================================================================
 
     customFrameRanges = config.get(r_functions.CONFIG_RANGER_SECTION, 'customFrameRanges')
-    startRenderQueue = r_functions.str_to_bool(config.get(r_functions.CONFIG_RANGER_SECTION, 'startRenderQueue'))
-    rangeFrom = 0
-    rangeTo = 0
 
     # ===================================================================
     def CreateLayout(self):
     # ===================================================================
         """ Called when Cinema 4D creates the dialog """
 
-        renderData = r_functions.get_render_settings()
-        self.rangeFrom = renderData[r_functions.RANGE_FROM]
-        self.rangeTo = renderData[r_functions.RANGE_TO]
-
         self.SetTitle("Submit Range Details")
 
         self.GroupBegin(id=GROUP_ID, flags=c4d.BFH_SCALEFIT, cols=2, rows=5)
+        # Spaces: left, top, right, bottom
+        self.GroupBorderSpace(10,20,10,20)
         """ Custom ranges field """
         self.AddStaticText(id=FRAME_RANGES_TEXT, flags=c4d.BFV_MASK, initw=145, name="Custom frame ranges: ", borderstyle=c4d.BORDER_NONE)
-        self.AddEditText(EDIT_FRAME_RANGES_TEXT, c4d.BFV_MASK, initw=240, inith=16, editflags=0)
-        self.SetString(EDIT_FRAME_RANGES_TEXT, self.customFrameRanges)
-        """ Start rendering field """
-        # self.AddStaticText(id=START_QUEUE_CHECKBOX_TEXT, flags=c4d.BFV_MASK, initw=145, name="*** Currently ignored", borderstyle=c4d.BORDER_NONE)
-        # self.AddCheckbox(START_QUEUE_CHECKBOX, flags=c4d.BFH_LEFT, initw=160, inith=22, name="Check to start rendering")
-        # self.SetBool(START_QUEUE_CHECKBOX, self.startRenderQueue)
+        self.AddEditText(id=EDIT_FRAME_RANGES_TEXT, flags=c4d.BFV_MASK, initw=240, inith=16, editflags=0)
+        self.SetString(id=EDIT_FRAME_RANGES_TEXT, value=self.customFrameRanges)
+        """ Button fields """
+        self.AddStaticText(id=BLANK_TEXT_1, flags=c4d.BFV_MASK, initw=145, name="", borderstyle=c4d.BORDER_NONE)
+        self.AddStaticText(id=BLANK_TEXT_2, flags=c4d.BFV_MASK, initw=145, name="", borderstyle=c4d.BORDER_NONE)
+        self.AddButton(id=CANCEL_BUTTON, flags=c4d.BFH_RIGHT | c4d.BFV_CENTER, initw=100, inith=16, name="Cancel")
+        self.AddButton(id=RENDER_BUTTON, flags=c4d.BFH_LEFT | c4d.BFV_CENTER, initw=100, inith=16, name="Render")
 
-        self.AddDlgGroup(c4d.DLG_OK | c4d.DLG_CANCEL)
         self.GroupEnd()
 
         return True
@@ -83,14 +80,13 @@ class RangerDlg(c4d.gui.GeDialog):
         """
 
         # User click on Ok button
-        if messageId == c4d.DLG_OK:
+        if messageId == RENDER_BUTTON:
 
             if '' == r_functions.get_projectFullPath():
                 gui.MessageDialog("Please open your project file")
                 return True
 
             self.customFrameRanges = self.GetString(EDIT_FRAME_RANGES_TEXT)
-            self.startRenderQueue = self.GetBool(START_QUEUE_CHECKBOX)
 
             # Analyse the custom frange ranges
             self.customFrameRanges = r_functions.analyse_frame_ranges(self.customFrameRanges)
@@ -98,19 +94,20 @@ class RangerDlg(c4d.gui.GeDialog):
                 gui.MessageDialog("Please enter at least one valid range, in the format 'm - m, n - n, etc'")
                 return False
 
+            if True == debug:
+                print("Frame range(s): ", self.customFrameRanges)
+
             # Save changes to the config file
             r_functions.update_config_values(r_functions.CONFIG_RANGER_SECTION, [
-                ('customFrameRanges', self.customFrameRanges),
-                ('startRenderQueue', self.startRenderQueue)
+                ('customFrameRanges', str(self.customFrameRanges))
                 ])
 
             # Create entries in the render queue for the frame ranges entered
             if True == self.submitRangeDetails():
-                # Reset the range for the next submission
-                self.rangeFrom = 0
-                self.rangeTo = 0
+                # Update the dialog with the normalised frame ranges
+                self.SetString(id=EDIT_FRAME_RANGES_TEXT, value=str(self.customFrameRanges))
 
-                # Close the Dialog:  currently leaving it open
+                # Currently leaving the dialog open
                 ######self.Close()
 
             else:
@@ -120,7 +117,7 @@ class RangerDlg(c4d.gui.GeDialog):
             return True
 
         # User click on Cancel button
-        elif messageId == c4d.DLG_CANCEL:
+        elif messageId == CANCEL_BUTTON:
             if True == verbose:
                 print("User clicked Cancel")
 
@@ -146,7 +143,7 @@ class RangerDlg(c4d.gui.GeDialog):
                 print("*** User cancelled the request")
             return False
 
-        if True == r_handle_render_queue.handle_render_queue(self.customFrameRanges, self.startRenderQueue):
+        if True == r_handle_render_queue.handle_render_queue(self.customFrameRanges):
             print("*** Custom frame ranges submitted")
 
         else:

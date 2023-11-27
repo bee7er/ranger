@@ -131,7 +131,7 @@ def normalise_frame_ranges(rangeArray):
             continue
 
         # If start of range is less than or equal to end of range plus 1
-        # E.g. 1-1, 2-6, combine them
+        # E.g. 1-1, 2-6, combine them as 1-6
         if int(elem[0]) <= int(outArray[outArrayLen - 1][1]) + 1:
             if int(elem[1]) >= int(outArray[outArrayLen - 1][1]):
                 outArray[outArrayLen - 1][1] = elem[1]
@@ -174,15 +174,11 @@ def get_projectFullPath():
     path = c4d.documents.BaseDocument.GetDocumentPath(md)
     name = c4d.documents.BaseDocument.GetDocumentName(md)
 
-    print("NB Project path is: ", path)
-    print("NB Project name is: ", name)
-
     c4dProjectFullPath = ''
     if '' == path:
         print("*** A project has not yet been opened for full path")
     else:
         c4dProjectFullPath = os.path.join(path, c4d.documents.BaseDocument.GetDocumentName(md))
-        print("NB Project opened is: ", c4dProjectFullPath)
 
     return c4dProjectFullPath
 
@@ -211,7 +207,6 @@ def get_projectName():
         return ''
 
     projectName = c4d.documents.BaseDocument.GetDocumentName(md)
-    print("*** Project name is ", projectName)
 
     return projectName
 
