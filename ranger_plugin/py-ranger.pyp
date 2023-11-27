@@ -10,11 +10,11 @@ import os, sys
 import c4d
 from c4d import gui, bitmaps, utils
 from c4d import documents
-# Ranger modules for various shared functions
-import r_functions, r_handle_render_queue
-
+# Add modules to the path before trying to reference them
 __root__ = os.path.dirname(__file__)
 if os.path.join(__root__, 'modules') not in sys.path: sys.path.insert(0, os.path.join(__root__, 'modules'))
+# Ranger modules for various shared functions
+import r_functions, r_handle_render_queue
 
 __res__ = c4d.plugins.GeResource()
 __res__.Init(__root__)
@@ -26,7 +26,7 @@ GROUP_ID = 100000
 FRAME_RANGES_TEXT = 100015
 EDIT_FRAME_RANGES_TEXT = 100016
 RENDER_BUTTON = 100017
-CANCEL_BUTTON = 100018
+CLOSE_BUTTON = 100018
 BLANK_TEXT_1 = 100019
 BLANK_TEXT_2 = 100020
 
@@ -57,7 +57,7 @@ class RangerDlg(c4d.gui.GeDialog):
         """ Button fields """
         self.AddStaticText(id=BLANK_TEXT_1, flags=c4d.BFV_MASK, initw=145, name="", borderstyle=c4d.BORDER_NONE)
         self.AddStaticText(id=BLANK_TEXT_2, flags=c4d.BFV_MASK, initw=145, name="", borderstyle=c4d.BORDER_NONE)
-        self.AddButton(id=CANCEL_BUTTON, flags=c4d.BFH_RIGHT | c4d.BFV_CENTER, initw=100, inith=16, name="Cancel")
+        self.AddButton(id=CLOSE_BUTTON, flags=c4d.BFH_RIGHT | c4d.BFV_CENTER, initw=100, inith=16, name="Close")
         self.AddButton(id=RENDER_BUTTON, flags=c4d.BFH_LEFT | c4d.BFV_CENTER, initw=100, inith=16, name="Render")
 
         self.GroupEnd()
@@ -114,11 +114,9 @@ class RangerDlg(c4d.gui.GeDialog):
 
             return True
 
-        # User click on Cancel button
-        elif messageId == CANCEL_BUTTON:
-            if True == verbose:
-                print("User clicked Cancel")
-
+        # User clicked on the Close button
+        elif messageId == CLOSE_BUTTON:
+            print("*** Dialog closed")
             # Close the Dialog
             self.Close()
             return True
@@ -142,7 +140,7 @@ class RangerDlg(c4d.gui.GeDialog):
             return False
 
         if True == r_handle_render_queue.handle_render_queue(self.customFrameRanges):
-            print("*** Custom frame ranges submitted")
+            print("*** Custom frame ranges submitted to queue")
 
         else:
             print("*** Unexpected result from custom frame ranges submission")
